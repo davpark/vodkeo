@@ -21,32 +21,42 @@ export async function login({ identifier, password, pds }: LoginParams) {
         const result = await agent.login({ identifier, password })
 
         const session = {
-        did: result.data.did,
-        handle: result.data.handle,
-        accessJwt: result.data.accessJwt,
-        refreshJwt: result.data.refreshJwt,
-        pds,
+            did: result.data.did,
+            handle: result.data.handle,
+            accessJwt: result.data.accessJwt,
+            refreshJwt: result.data.refreshJwt,
+            pds,
         }
+
+        await fetch(`${process.env.BACKEND_URL}/api/users`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                did: result.data.did,
+                handle: result.data.handle,
+                birthday: null,
+            }),
+        })
 
         const cookieStore = await cookies()
         cookieStore.set('atproto_session', JSON.stringify(session), {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
         })
 
         return { success: true }
     } catch (err: unknown) {
         if (err instanceof Error) {
-        return { error: err.message }
+            return { error: err.message }
         }
         return { error: 'Login failed. Please try again.' }
     }
 }
 
 export async function logout() {
-  const cookieStore = await cookies()
-  cookieStore.delete('atproto_session')
+    const cookieStore = await cookies()
+    cookieStore.delete('atproto_session')
 }

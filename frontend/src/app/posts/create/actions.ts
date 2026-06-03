@@ -1,7 +1,6 @@
 'use server'
 
-import { getSession } from '@/lib/session'
-import { cookies } from 'next/headers'
+import { getValidSession } from '@/lib/refreshSession'
 
 interface PostData {
   title: string
@@ -10,7 +9,7 @@ interface PostData {
 }
 
 export async function submitPost(data: PostData) {
-  const session = await getSession()
+  const session = await getValidSession()
 
   if (!session) {
     return { error: 'You must be logged in to create a post.' }

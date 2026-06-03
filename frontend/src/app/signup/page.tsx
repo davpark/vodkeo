@@ -18,10 +18,20 @@ const RESERVED_USERNAMES = [
     'official', 'contact', 'info', 'news', 'search', 'account',
 ]
 
+function ageCheck(birthday: string): boolean {
+  const today = new Date()
+  const birth = new Date(birthday)
+  const age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    return age - 1 >= 18
+  }
+  return age >= 18
+}
+
 export default function SignupPage() {
     const router = useRouter()
     const [provider, setProvider] = useState<Provider>('vodkeo')
-
     const [form, setForm] = useState({
         username: '',
         email: '',
@@ -29,6 +39,7 @@ export default function SignupPage() {
         confirmPassword: '',
         inviteCode: '',
         customPds: '',
+        birthday: '',
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -66,6 +77,11 @@ export default function SignupPage() {
         if (form.password !== form.confirmPassword) 
             return 'Passwords do not match.'
 
+        if (!form.birthday)
+            return 'Date of birth is required.'
+        if (!ageCheck(form.birthday))
+            return 'You must be at least 18 years old to sign up.'
+
         return null
     }
 
@@ -102,26 +118,41 @@ export default function SignupPage() {
         setLoading(true)
 
         try {
-        const agent = new AtpAgent({ service: getPds() })
+            const agent = new AtpAgent({ service: getPds() })
+            const result = await agent.createAccount({
+                email: form.email,
+                handle: getHandle(),
+                password: form.password,
+                inviteCode: form.inviteCode || undefined,
+            })
 
-        await agent.createAccount({
-            email: form.email,
-            handle: getHandle(),
-            password: form.password,
-            inviteCode: form.inviteCode || undefined,
-        })
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                did: result.data.did,
+                handle: getHandle(),
+                birthday: form.birthday,
+                }),
+            })
 
-        router.push('/login')
-        } catch (err: unknown) {
-        if (err instanceof Error) {
-            setError(err.message)
-        } else {
-            setError('Something went wrong. Please try again.')
+            router.push('/login')
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    if (err.message.toLowerCase().includes('handle') || 
+                        err.message.toLowerCase().includes('taken') ||
+                        err.message.toLowerCase().includes('already exists')) {
+                    setError('That username has already been taken.')
+                    } else {
+                    setError(err.message)
+                    }
+                } else {
+                    setError('Something went wrong. Please try again.')
+                }
+            } finally {
+            setLoading(false)
+            }
         }
-        } finally {
-        setLoading(false)
-        }
-    }
 
     return (
         <div>
@@ -230,6 +261,22 @@ export default function SignupPage() {
                     onChange={handleChange}
                     required
                     />
+                </div>
+
+                {/* Birthday */}
+                <div className="form-field">
+                    <label htmlFor="birthday">Date of Birth</label>
+                    <input
+                    id="birthday"
+                    name="birthday"
+                    type="date"
+                    value={form.birthday}
+                    onChange={handleChange}
+                    required
+                    />
+                    <span className="form-hint">
+                    You must be at least 18 years old to sign up.
+                    </span>
                 </div>
 
                 <div className="form-field">

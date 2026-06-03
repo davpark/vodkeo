@@ -45,17 +45,19 @@ export default async function HomePage() {
                     })}
                   </span>
                 </div>
-                <span className="post-author">
+                <Link href={`/u/${post.authorHandle}`} className="post-author">
                   {post.authorHandle ?? post.author?.name ?? post.author?.email ?? 'Unknown'}
-                </span>
+                </Link>
               </div>
 
               {/* Bottom row */}
               <div className="post-card-bottom">
-                <p className="post-preview">
-                  {post.content.slice(0, 150)}
-                  {post.content.length > 150 ? '...' : ''}
-                </p>
+                <div className="post-card-bottom-left">
+                  <p className="post-preview">
+                    {post.content.slice(0, 150)}
+                    {post.content.length > 150 ? '...' : ''}
+                  </p>
+                </div>
                 <span className="post-tags">
                   {'tags: '}
                   <em>
