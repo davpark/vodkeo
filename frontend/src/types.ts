@@ -5,11 +5,18 @@ export type Author = {
   createdAt: string;
 };
 
-export type Post = {
-  id: number;
-  title: string;
-  content: string;
-  published: boolean;
-  createdAt: string;
-  author: Author | null;
-};
+export interface Post {
+  id: number
+  title: string
+  content: string
+  published: boolean
+  status: string
+  tags: string[]
+  authorDid?: string
+  authorHandle?: string
+  createdAt: string
+  author?: {
+    name?: string
+    email?: string
+  }
+}

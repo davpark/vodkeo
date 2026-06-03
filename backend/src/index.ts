@@ -43,15 +43,24 @@ app.get('/api/posts/:id', async (req, res) => {
 // Create a post (temporary - no auth yet)
 app.post('/api/posts', async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, tags, authorDid, authorHandle, status, published } = req.body
     const post = await prisma.post.create({
-      data: { title, content, published: true },
-    });
-    res.json(post);
+      data: {
+        title,
+        content,
+        tags: tags || [],
+        authorDid,
+        authorHandle,
+        status: status || 'approved',
+        published: published ?? true,
+      },
+    })
+    res.json(post)
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create post' });
+    console.error('POST /api/posts error:', error)
+    res.status(500).json({ error: 'Failed to create post' })
   }
-});
+})
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

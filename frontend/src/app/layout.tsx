@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from 'next-themes'
 import { Martian_Mono, Nanum_Myeongjo } from 'next/font/google'
 import "./globals.css";
+import { getSession } from '@/lib/session'
+import Navbar from '@/components/Navbar'
 
 const martianMono = Martian_Mono({
   subsets: ['latin'],
@@ -19,16 +21,22 @@ const nanumMyeongjo = Nanum_Myeongjo({
 
 export const metadata: Metadata = {
   title: "Vodkeo",
+  other: {
+    'adobe-fonts': '<link rel="stylesheet" href="https://use.typekit.net/bmg0zec.css">',
+  }
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession()
+
   return (
     <html lang="en" className={`${martianMono.variable} ${nanumMyeongjo.variable}`} suppressHydrationWarning>
       <head>
         <link rel="stylesheet" href="https://use.typekit.net/bmg0zec.css" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Navbar isLoggedIn={!!session} />
           {children}
         </ThemeProvider>
       </body>
