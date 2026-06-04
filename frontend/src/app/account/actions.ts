@@ -97,25 +97,9 @@ export async function deleteAccount() {
   if (!session) return { error: 'Not logged in.' }
 
   try {
-    const agent = new AtpAgent({ service: session.pds })
-    await agent.resumeSession({
-      did: session.did,
-      handle: session.handle,
-      accessJwt: session.accessJwt,
-      refreshJwt: session.refreshJwt,
-      active: true,
-    })
-
-    // Delete from PDS
-    await agent.com.atproto.server.deleteAccount({
-      did: session.did,
-      password: '',
-      token: '',
-    })
-
-    // Delete from database
+    // Delete posts and comments from database
     await fetch(`${process.env.BACKEND_URL}/api/users?did=${encodeURIComponent(session.did)}`, {
-        method: 'DELETE',
+      method: 'DELETE',
     })
 
     // Clear session

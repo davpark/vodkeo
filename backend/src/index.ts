@@ -91,6 +91,7 @@ app.delete('/api/users', async (req, res) => {
     return
   }
   try {
+    await prisma.comment.deleteMany({ where: { authorDid: did as string } })
     await prisma.post.deleteMany({ where: { authorDid: did as string } })
     await prisma.userProfile.delete({ where: { did: did as string } })
     res.json({ success: true })

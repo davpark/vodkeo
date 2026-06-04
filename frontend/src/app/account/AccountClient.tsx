@@ -307,19 +307,21 @@ export default function AccountClient({ session, profile, posts }: Props) {
 
         {/* Delete Account */}
         {section === 'delete' && (
-          <div className="account-section">
-            <p className="text-muted" style={{ marginBottom: '1.5rem' }}>
-              This will permanently delete your account and all your posts. This cannot be undone.
-            </p>
-            {error && <p className="form-error">{error}</p>}
-            <button
-              className="btn btn-danger"
-              onClick={handleDeleteAccount}
-              disabled={loading}
-            >
-              {loading ? 'Deleting...' : 'Delete My Account'}
-            </button>
-          </div>
+            <div className="account-section">
+                <p className="text-muted" style={{ marginBottom: '1.5rem', fontSize: '0.8rem' }}>
+                This will permanently delete your Vodkeo profile and all your posts and comments.
+                Your AT Protocol identity (DID) will remain intact and can be managed via another
+                AT Protocol client. This cannot be undone.
+                </p>
+                {error && <p className="form-error">{error}</p>}
+                <button
+                className="btn btn-danger"
+                onClick={handleDeleteAccount}
+                disabled={loading}
+                >
+                {loading ? 'Deleting...' : 'Delete My Account'}
+                </button>
+            </div>
         )}
 
       </div>

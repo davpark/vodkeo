@@ -615,7 +615,7 @@ body {
 }
 
 .account-content {
-  max-width: 520px;
+  max-width: auto;
 }
 
 .account-section {
