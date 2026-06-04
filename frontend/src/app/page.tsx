@@ -206,10 +206,6 @@ export default async function HomePage({
 
         </aside>
       </div>
-
-      <div className="page-bottom-bar">
-        <ThemeToggle />
-      </div>
     </main>
   )
 }
