@@ -1,17 +1,44 @@
 import { getPost } from '@/lib/api';
 import Link from 'next/link';
+import { getSession } from '@/lib/session'
+import CommentSection from './CommentSection'
+
+async function incrementView(id: number) {
+  try {
+    await fetch(`${process.env.BACKEND_URL}/api/posts/${id}/view`, {
+      method: 'POST',
+      cache: 'no-store',
+    })
+  } catch {}
+}
+
+async function getComments(id: number) {
+  try {
+    const res = await fetch(
+      `${process.env.BACKEND_URL}/api/posts/${id}/comments`,
+      { cache: 'no-store' }
+    )
+    if (!res.ok) return []
+    return res.json()
+  } catch {
+    return []
+  }
+}
 
 export default async function PostPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const post = await getPost(Number(id));
+  const { id } = await params
+  const post = await getPost(Number(id))
+  const session = await getSession()
+  const comments = await getComments(Number(id))
+
+  await incrementView(Number(id))
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-12">
-
       <Link href="/" className="nav-link" style={{ paddingLeft: 0 }}>
         ← Back
       </Link>
@@ -53,6 +80,11 @@ export default async function PostPage({
           )}
         </div>
         
+        <CommentSection
+          postId={Number(id)}
+          comments={comments}
+          session={session}
+        />
       </div>
     </main>
   );

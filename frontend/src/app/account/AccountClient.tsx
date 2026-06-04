@@ -124,7 +124,7 @@ export default function AccountClient({ session, profile, posts }: Props) {
 
       {/* Section tabs */}
       <div className="account-tabs">
-        {(['info', 'email', 'posts', 'delete'] as const).map((s) => (
+        {(['info', 'posts', 'delete'] as const).map((s) => (
           <button
             key={s}
             className={`account-tab ${section === s ? 'active' : ''}`}
@@ -132,7 +132,7 @@ export default function AccountClient({ session, profile, posts }: Props) {
           >
             {s === 'info' ? 'Profile' :
             //  s === 'password' ? 'Change Password' :
-             s === 'email' ? 'Change Email' :
+            //  s === 'email' ? 'Change Email' :
              s === 'posts' ? 'Your Posts' :
              'Delete Account'}
           </button>

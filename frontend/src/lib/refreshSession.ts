@@ -28,22 +28,24 @@ export async function refreshSession(): Promise<AtpSession | null> {
         pds: session.pds,
       }
 
-      const cookieStore = await cookies()
-      cookieStore.set('atproto_session', JSON.stringify(newSession), {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      })
+      try {
+        const cookieStore = await cookies()
+        cookieStore.set('atproto_session', JSON.stringify(newSession), {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        })
+      } catch {
+
+      }
 
       return newSession
     }
 
     return session
   } catch {
-    const cookieStore = await cookies()
-    cookieStore.delete('atproto_session')
     return null
   }
 }
@@ -56,7 +58,7 @@ export async function getValidSession(): Promise<AtpSession | null> {
     const payload = JSON.parse(
       Buffer.from(session.accessJwt.split('.')[1], 'base64').toString()
     )
-    const expiresAt = payload.exp * 1000 // convert to ms
+    const expiresAt = payload.exp * 1000
     const now = Date.now()
     const fiveMinutes = 5 * 60 * 1000
 

@@ -136,7 +136,9 @@ exports.Prisma.PostScalarFieldEnum = {
   tags: 'tags',
   authorDid: 'authorDid',
   authorHandle: 'authorHandle',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  views: 'views',
+  score: 'score'
 };
 
 exports.Prisma.CommentScalarFieldEnum = {
@@ -144,7 +146,8 @@ exports.Prisma.CommentScalarFieldEnum = {
   content: 'content',
   createdAt: 'createdAt',
   authorDid: 'authorDid',
-  postId: 'postId'
+  postId: 'postId',
+  parentId: 'parentId'
 };
 
 exports.Prisma.SortOrder = {

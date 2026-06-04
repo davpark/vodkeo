@@ -3,14 +3,15 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { submitPost } from './actions'
+import TagInput from '@/components/TagInput'
 
 export default function CreatePostPage() {
   const router = useRouter()
   const [form, setForm] = useState({
     title: '',
     content: '',
-    tags: '',
   })
+  const [tags, setTags] = useState<string[]>([])
   const [images, setImages] = useState<File[]>([])
   const [previews, setPreviews] = useState<string[]>([])
   const [error, setError] = useState('')
@@ -54,7 +55,7 @@ export default function CreatePostPage() {
       const result = await submitPost({
         title: form.title,
         content: form.content,
-        tags: form.tags,
+        tags: tags.join(','),  // actions.ts splits on comma
       })
 
       if (result?.error) {
@@ -103,20 +104,17 @@ export default function CreatePostPage() {
 
         {/* Tags */}
         <div className="form-field">
-          <label htmlFor="tags">Tags</label>
-          <input
-            id="tags"
-            name="tags"
-            type="text"
-            value={form.tags}
-            onChange={handleChange}
-            placeholder="e.g. news, gaming, art"
+          <label>Tags</label>
+          <TagInput
+            tags={tags}
+            onChange={setTags}
+            maxTags={10}
+            maxLength={20}
           />
-          <span className="form-hint">Separate tags with commas.</span>
         </div>
 
         {/* Images */}
-        <div className="form-field">
+        {/* <div className="form-field">
           <label>Images</label>
           <label htmlFor="images" className="btn" style={{ display: 'inline-block', cursor: 'pointer' }}>
             Add Images
@@ -132,7 +130,6 @@ export default function CreatePostPage() {
           />
           <span className="form-hint">Maximum 4 images.</span>
 
-          {/* Image previews */}
           {previews.length > 0 && (
             <div className="image-previews">
               {previews.map((src, i) => (
@@ -149,7 +146,7 @@ export default function CreatePostPage() {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
 
         {error && <p className="form-error">{error}</p>}
 
