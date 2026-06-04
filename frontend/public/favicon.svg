@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    @import url('https://use.typekit.net/bmg0zec.css');
+    
+    text {
+      font-family: "ambroise-std", serif;
+      font-size: 18px;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+
+    .fg { fill: #0e1a0b; }
+
+    @media (prefers-color-scheme: dark) {
+      .fg { fill: #d4ffd9; }
+    }
+  </style>
+  <text x="16" y="17" class="fg">Vㅋ</text>
+</svg>
