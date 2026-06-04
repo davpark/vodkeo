@@ -4,6 +4,7 @@ import { Martian_Mono, Nanum_Myeongjo } from 'next/font/google'
 import "./globals.css";
 import { getSession } from '@/lib/session'
 import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
 
 const martianMono = Martian_Mono({
   subsets: ['latin'],
@@ -21,6 +22,9 @@ const nanumMyeongjo = Nanum_Myeongjo({
 
 export const metadata: Metadata = {
   title: "Vodkeo",
+  icons: {
+    icon: '/favicon.svg',
+  },
   other: {
     'adobe-fonts': '<link rel="stylesheet" href="https://use.typekit.net/bmg0zec.css">',
   }
@@ -36,8 +40,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar isLoggedIn={!!session} />
-          {children}
+          <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar isLoggedIn={!!session} handle={session?.handle} />
+            <div style={{ flex: 1 }}>
+              {children}
+            </div>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>

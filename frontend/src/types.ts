@@ -15,8 +15,17 @@ export interface Post {
   authorDid?: string
   authorHandle?: string
   createdAt: string
+  commentCount?: number
   author?: {
     name?: string
     email?: string
   }
+}
+
+export interface TopPost {
+  id: number
+  title: string
+  authorHandle?: string
+  score: number
+  commentCount: number
 }

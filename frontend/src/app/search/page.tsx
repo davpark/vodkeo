@@ -22,12 +22,17 @@ export default async function SearchPage({
   return (
     <main className="max-w-5xl mx-auto px-2 py-4">
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}>
-        {q ? `Results for "${q}"` : 'Search'}
+        {!q ? 'Search' : posts.length === 0 ? (
+          `No results found for "${q}"`
+        ) : (
+          <>
+            Results for "{q}"
+            <span className="text-muted" style={{ fontSize: '0.75rem', marginLeft: '0.75rem', fontWeight: 400, letterSpacing: '0.04em' }}>
+              {posts.length} {posts.length === 1 ? 'result' : 'results'}
+            </span>
+          </>
+        )}
       </h1>
-
-      {q && posts.length === 0 && (
-        <p className="text-muted">No results found for "{q}".</p>
-      )}
 
       {posts.length > 0 && (
         <div className="post-list">

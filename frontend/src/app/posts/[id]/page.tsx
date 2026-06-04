@@ -75,7 +75,19 @@ export default async function PostPage({
           {post.tags && post.tags.length > 0 && (
             <span className="post-tags" style={{ textAlign: 'left' }}>
               {'tags: '}
-              <em>{post.tags.join(', ')}</em>
+              <em>
+                {post.tags.map((tag, i) => (
+                  <span key={tag}>
+                    <Link
+                      href={`/?tag=${encodeURIComponent(tag)}`}
+                      className="tag-link"
+                    >
+                      {tag}
+                    </Link>
+                    {i < post.tags.length - 1 ? ', ' : ''}
+                  </span>
+                ))}
+              </em>
             </span>
           )}
         </div>

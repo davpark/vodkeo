@@ -124,12 +124,33 @@ app.get('/api/posts', async (req, res) => {
         authorHandle: true,
         createdAt: true,
         author: true,
+        _count: { select: { comments: true } },
       },
     })
     res.json(posts)
   } catch (error) {
     console.error('GET /api/posts error:', error)
     res.status(500).json({ error: 'Failed to fetch posts' })
+  }
+})
+
+app.get('/api/posts/top', async (req, res) => {
+  try {
+    const posts = await prisma.post.findMany({
+      where: { published: true },
+      orderBy: { score: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        authorHandle: true,
+        score: true,
+        _count: { select: { comments: true } },
+      },
+    })
+    res.json(posts)
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch top posts' })
   }
 })
 
