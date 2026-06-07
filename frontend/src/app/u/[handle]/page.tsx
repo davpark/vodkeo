@@ -24,6 +24,10 @@ interface UserComment {
     title: string
     deleted: boolean
   } | null
+  parent: {
+    id: number
+    author: { handle: string } | null
+  } | null 
 }
 
 export default async function PublicProfilePage({
