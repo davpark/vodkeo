@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { AtpSession } from '@/lib/session'
 import { submitComment, deleteComment } from './actions'
 import RichTextEditor from '@/components/RichTextEditor'
-import DOMPurify from 'isomorphic-dompurify'
+import DOMPurify from 'dompurify'
 
 interface Author {
   handle: string

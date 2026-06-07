@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getSession } from '@/lib/session'
 import CommentSection from './CommentSection'
 import DeletePostButton from './DeletePostButton'
-import DOMPurify from 'isomorphic-dompurify'
+import DOMPurify from 'dompurify'
 
 async function incrementView(id: number) {
   try {
@@ -77,7 +77,7 @@ export default async function PostPage({
           <>
             <div
               className="post-content"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+              dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
             {post.tags && post.tags.length > 0 && (
