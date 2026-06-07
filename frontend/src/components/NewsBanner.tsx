@@ -79,9 +79,9 @@ export default function NewsBanner({ post, isLoggedIn }: { post: Post; isLoggedI
               <Link href={`/posts/${post.id}`} className="news-banner-read">
                 Read more →
               </Link>
-              <button className="btn" onClick={handleSubscribe}>
+              {/* <button className="btn" onClick={handleSubscribe}>
                 {subscribed ? 'Unsubscribe' : 'Subscribe'}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
