@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { AtpSession } from '@/lib/session'
 import { submitComment, deleteComment } from './actions'
+import RichTextEditor from '@/components/RichTextEditor'
+import DOMPurify from 'isomorphic-dompurify'
 
 interface Author {
   handle: string
@@ -48,12 +50,13 @@ function CommentForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    const plainText = content.replace(/<[^>]+>/g, '')
 
-    if (!content.trim()) {
+    if (!plainText.trim()) {
       setError('Comment cannot be empty.')
       return
     }
-    if (content.length > 500) {
+    if (plainText.length > 500) {
       setError('Comment must be 500 characters or fewer.')
       return
     }
@@ -73,14 +76,14 @@ function CommentForm({
   return (
     <form onSubmit={handleSubmit} className="comment-form">
       <div className="form-field">
-        <textarea
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          rows={3}
-          maxLength={500}
-          placeholder={placeholder}
+        <RichTextEditor
+          content={content}
+          onChange={setContent}
+          minimal
         />
-        <span className="form-hint">{content.length}/500 characters</span>
+        <span className="form-hint">
+          {content.replace(/<[^>]+>/g, '').length}/500 characters
+        </span>
       </div>
       {error && <p className="form-error">{error}</p>}
       <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -153,9 +156,11 @@ export default function CommentSection({ postId, comments: initial, session }: P
                 </a>
               )}
 
-              <p className="comment-content">{comment.content}</p>
+              <div
+                className="comment-content"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(comment.content) }}
+              />
 
-              {/* Reply button */}
               {session && (
                 <button
                   className="comment-reply-btn"
@@ -167,7 +172,6 @@ export default function CommentSection({ postId, comments: initial, session }: P
                 </button>
               )}
 
-              {/* Inline reply form */}
               {replyingTo === comment.id && (
                 <div className="comment-reply-form">
                   <CommentForm

@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "@atproto/api": "^0.20.8"
+    "@atproto/api": "^0.20.8",
+    "@tiptap/pm": "^3.26.0",
+    "@tiptap/react": "^3.26.0",
+    "@tiptap/starter-kit": "^3.26.0"
   }
 }

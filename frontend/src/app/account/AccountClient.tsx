@@ -9,9 +9,25 @@ import { changePassword, changeEmail, deleteAccount, requestPasswordReset } from
 interface Post {
   id: number
   title: string
+  content: string
   createdAt: string
   status: string
   tags: string[]
+}
+
+interface UserComment {
+  id: number
+  content: string
+  createdAt: string
+  post: {
+    id: number
+    title: string
+    deleted: boolean
+  } | null
+  parent: {
+    id: number
+    author: { handle: string } | null
+  } | null
 }
 
 interface Profile {
@@ -28,57 +44,80 @@ interface Props {
 }
 
 export default function AccountClient({ session, profile, posts }: Props) {
-    const router = useRouter()
-    const [section, setSection] = useState<'info' | 'password' | 'email' | 'posts' | 'delete'>('info')
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
+  const router = useRouter()
+  const [section, setSection] = useState<'info' | 'password' | 'email' | 'posts' | 'comments' | 'delete'>('info')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
-    const [passwordForm, setPasswordForm] = useState({
-        token: '',
-        newPassword: '',
-        confirmPassword: '',
-    })
-    const [tokenSent, setTokenSent] = useState(false)
+  const [comments, setComments] = useState<UserComment[]>([])
+  const [commentsLoaded, setCommentsLoaded] = useState(false)
+  const [commentsLoading, setCommentsLoading] = useState(false)
 
-    const [emailForm, setEmailForm] = useState({
-        newEmail: '',
-        password: '',
-    })
+  const [passwordForm, setPasswordForm] = useState({
+      token: '',
+      newPassword: '',
+      confirmPassword: '',
+  })
+  const [tokenSent, setTokenSent] = useState(false)
 
-    function resetMessages() {
-        setError('')
-        setSuccess('')
+  const [emailForm, setEmailForm] = useState({
+      newEmail: '',
+      password: '',
+  })
+
+  function resetMessages() {
+      setError('')
+      setSuccess('')
+  }
+
+  async function handleSectionChange(s: typeof section) {
+    setSection(s)
+    resetMessages()
+    if (s === 'comments' && !commentsLoaded) {
+      setCommentsLoading(true)
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/users/comments?did=${encodeURIComponent(session.did)}`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          setComments(data)
+        }
+      } catch {}
+      setCommentsLoaded(true)
+      setCommentsLoading(false)
     }
+  }
 
-    async function handlePasswordChange(e: React.FormEvent) {
-        e.preventDefault()
-        resetMessages()
+  async function handlePasswordChange(e: React.FormEvent) {
+      e.preventDefault()
+      resetMessages()
 
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-        setError('New passwords do not match.')
-        return
-        }
-        if (passwordForm.newPassword.length < 8) {
-        setError('Password must be at least 8 characters.')
-        return
-        }
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError('New passwords do not match.')
+      return
+      }
+      if (passwordForm.newPassword.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+      }
 
-        setLoading(true)
-        const result = await changePassword({
-            token: passwordForm.token,
-            newPassword: passwordForm.newPassword,
-        })
-        setLoading(false)
+      setLoading(true)
+      const result = await changePassword({
+          token: passwordForm.token,
+          newPassword: passwordForm.newPassword,
+      })
+      setLoading(false)
 
-        if (result?.error) {
-            setError(result.error)
-        } else {
-            setSuccess('Password updated successfully.')
-            setPasswordForm({ token: '', newPassword: '', confirmPassword: '' })
-            setTokenSent(false)
-        }
-    }
+      if (result?.error) {
+          setError(result.error)
+      } else {
+          setSuccess('Password updated successfully.')
+          setPasswordForm({ token: '', newPassword: '', confirmPassword: '' })
+          setTokenSent(false)
+      }
+  }
 
   async function handleEmailChange(e: React.FormEvent) {
     e.preventDefault()
@@ -124,17 +163,18 @@ export default function AccountClient({ session, profile, posts }: Props) {
 
       {/* Section tabs */}
       <div className="account-tabs">
-        {(['info', 'posts', 'delete'] as const).map((s) => (
+        {(['info','posts', 'comments', 'password', 'email', 'delete'] as const).map((s) => (
           <button
             key={s}
             className={`account-tab ${section === s ? 'active' : ''}`}
-            onClick={() => { setSection(s); resetMessages() }}
+            onClick={() => handleSectionChange(s)}
           >
             {s === 'info' ? 'Profile' :
-            //  s === 'password' ? 'Change Password' :
-            //  s === 'email' ? 'Change Email' :
-             s === 'posts' ? 'Your Posts' :
-             'Delete Account'}
+              s === 'posts' ? 'Posts' :
+              s === 'comments' ? 'Comments' :
+              s === 'password' ? 'Change Password' :
+              s === 'email' ? 'Change Email' :
+              'Delete Account'}
           </button>
         ))}
       </div>
@@ -169,79 +209,88 @@ export default function AccountClient({ session, profile, posts }: Props) {
 
         {/* Change Password */}
         {section === 'password' && (
-            <div className="account-section">
-                {!tokenSent ? (
-                <div>
-                    <p className="form-hint" style={{ marginBottom: '1rem' }}>
-                    A reset token will be sent to your registered email address.
-                    </p>
-                    {error && <p className="form-error">{error}</p>}
-                    <button
-                    className="btn"
-                    disabled={loading}
-                    onClick={async () => {
-                        setLoading(true)
-                        resetMessages()
-                        const result = await requestPasswordReset()
-                        setLoading(false)
-                        if (result?.error) {
-                        setError(result.error)
-                        } else {
-                        setTokenSent(true)
-                        }
-                    }}
-                    >
-                    {loading ? 'Sending...' : 'Send Reset Email'}
-                    </button>
-                </div>
-                ) : (
-                <form onSubmit={handlePasswordChange} className="signup-form">
-                    <div className="form-field">
-                    <label htmlFor="token">Reset Token</label>
-                    <input
-                        id="token"
-                        type="text"
-                        value={passwordForm.token}
-                        onChange={e => setPasswordForm(p => ({ ...p, token: e.target.value }))}
-                        placeholder="Enter token from your email"
-                        required
-                    />
-                    </div>
-                    <div className="form-field">
-                    <label htmlFor="newPassword">New Password</label>
-                    <input
-                        id="newPassword"
-                        type="password"
-                        value={passwordForm.newPassword}
-                        onChange={e => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
-                        required
-                    />
-                    <span className="form-hint">8+ characters with at least one uppercase letter and one number.</span>
-                    </div>
-                    <div className="form-field">
-                    <label htmlFor="confirmPassword">Confirm New Password</label>
-                    <input
-                        id="confirmPassword"
-                        type="password"
-                        value={passwordForm.confirmPassword}
-                        onChange={e => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))}
-                        required
-                    />
-                    </div>
-                    {error && <p className="form-error">{error}</p>}
-                    {success && <p className="form-success">{success}</p>}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button type="submit" className="btn" disabled={loading}>
-                        {loading ? 'Updating...' : 'Update Password'}
-                    </button>
-                    <button type="button" className="btn" onClick={() => setTokenSent(false)}>
-                        Back
-                    </button>
-                    </div>
-                </form>
-                )}
-            </div>
+          <div className="account-section">
+            {!tokenSent ? (
+              <div>
+                <p className="form-hint" style={{ marginBottom: '1rem' }}>
+                  A reset token will be sent to your registered email address.
+                </p>
+                {error && <p className="form-error">{error}</p>}
+                <button
+                  className="btn"
+                  disabled={loading}
+                  onClick={async () => {
+                    setLoading(true)
+                    resetMessages()
+                    const result = await requestPasswordReset()
+                    setLoading(false)
+                    if (result?.error) {
+                    setError(result.error)
+                    } else {
+                    setTokenSent(true)
+                    }
+                  }}
+                  >
+                  {loading ? 'Sending...' : 'Send Reset Email'}
+                </button>
+                <button
+                  className="btn ml-3"
+                  onClick={() => {
+                    resetMessages()
+                    setTokenSent(true)
+                  }}
+                >
+                  Enter Reset Token
+                </button>
+              </div>
+            ) : (
+            <form onSubmit={handlePasswordChange} className="signup-form">
+              <div className="form-field">
+                <label htmlFor="token">Reset Token</label>
+                <input
+                  id="token"
+                  type="text"
+                  value={passwordForm.token}
+                  onChange={e => setPasswordForm(p => ({ ...p, token: e.target.value }))}
+                  placeholder="Enter token from your email"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="newPassword">New Password</label>
+                <input
+                  id="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={e => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
+                  required
+                />
+                <span className="form-hint">8+ characters with at least one uppercase letter and one number.</span>
+              </div>
+              <div className="form-field">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={e => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                  required
+                />
+              </div>
+              {error && <p className="form-error">{error}</p>}
+              {success && <p className="form-success">{success}</p>}
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button type="submit" className="btn" disabled={loading}>
+                  {loading ? 'Updating...' : 'Update Password'}
+                </button>
+                <button type="button" className="btn" onClick={() => setTokenSent(false)}>
+                  Back
+                </button>
+              </div>
+            </form>
             )}
+          </div>
+        )}
 
         {/* Change Email */}
         {section === 'email' && (
@@ -276,17 +325,16 @@ export default function AccountClient({ session, profile, posts }: Props) {
           </div>
         )}
 
-        {/* Your Posts */}
         {section === 'posts' && (
           <div className="account-section">
             {posts.length === 0 ? (
-              <p className="text-muted">You haven't posted anything yet.</p>
+              <p className="text-muted">Nothing here!</p>
             ) : (
               <div className="account-posts">
                 {posts.map(post => (
                   <div key={post.id} className="account-post-row">
                     <div className="account-post-left">
-                      <Link href={`/posts/${post.id}`} className="post-title">
+                      <Link href={`/posts/${post.id}`} className="post-title" style={{ fontSize: '1.1rem' }}>
                         {post.title}
                       </Link>
                       <span className="post-date">
@@ -294,16 +342,71 @@ export default function AccountClient({ session, profile, posts }: Props) {
                           year: 'numeric', month: 'long', day: 'numeric'
                         })}
                       </span>
+                      {post.content && (
+                        <p className="post-preview" style={{ marginTop: '0.25rem' }}>
+                          {post.content.replace(/<[^>]+>/g, '').slice(0, 120)}
+                          {post.content.replace(/<[^>]+>/g, '').length > 120 ? '...' : ''}
+                        </p>
+                      )}
                     </div>
-                    <div className="account-post-right">
+                    {/* <div className="account-post-right">
                       <Link href={`/posts/${post.id}/edit`} className="btn">Edit</Link>
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
+
+       {section === 'comments' && (
+        <div className="account-section">
+          {commentsLoading ? (
+            <p className="text-muted">Loading...</p>
+          ) : comments.length === 0 ? (
+            <p className="text-muted">Nothing here!</p>
+          ) : (
+            <div className="account-posts">
+              {comments.map(comment => (
+                <div key={comment.id} className="account-post-row">
+                  <div className="account-post-left">
+                    {comment.post && !comment.post.deleted ? (
+                      <Link
+                        href={`/posts/${comment.post.id}#comment-${comment.id}`}
+                        className="post-title"
+                        style={{ fontSize: '0.85rem' }}
+                      >
+                        on: {comment.post.title}
+                      </Link>
+                    ) : (
+                      <span className="text-muted" style={{ fontSize: '0.85rem', fontStyle: 'italic' }}>
+                        on: [deleted post]
+                      </span>
+                    )}
+                    {comment.parent && (
+                      <a
+                        href={comment.post ? `/posts/${comment.post.id}#comment-${comment.parent.id}` : '#'}
+                        className="comment-reply-ref"
+                      >
+                        ↩ replying to @{comment.parent.author?.handle ?? 'Unknown'}
+                      </a>
+                    )}
+                    <span className="post-date">
+                      {new Date(comment.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                      })}
+                    </span>
+                    <p className="post-preview" style={{ marginTop: '0.25rem' }}>
+                      {comment.content.replace(/<[^>]+>/g, '').slice(0, 120)}
+                      {comment.content.replace(/<[^>]+>/g, '').length > 120 ? '...' : ''}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
         {/* Delete Account */}
         {section === 'delete' && (

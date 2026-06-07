@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { submitPost } from './actions'
 import TagInput from '@/components/TagInput'
+import RichTextEditor from '@/components/RichTextEditor'
 
 export default function CreatePostPage() {
   const router = useRouter()
@@ -31,10 +32,10 @@ export default function CreatePostPage() {
     setPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))])
   }
 
-  function removeImage(index: number) {
-    setImages(prev => prev.filter((_, i) => i !== index))
-    setPreviews(prev => prev.filter((_, i) => i !== index))
-  }
+  // function removeImage(index: number) {
+  //   setImages(prev => prev.filter((_, i) => i !== index))
+  //   setPreviews(prev => prev.filter((_, i) => i !== index))
+  // }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -44,7 +45,7 @@ export default function CreatePostPage() {
       setError('Title is required.')
       return
     }
-    if (!form.content.trim()) {
+    if (!form.content.replace(/<[^>]+>/g, '').trim()) {
       setError('Content is required.')
       return
     }
@@ -55,7 +56,7 @@ export default function CreatePostPage() {
       const result = await submitPost({
         title: form.title,
         content: form.content,
-        tags: tags.join(','),  // actions.ts splits on comma
+        tags: tags.join(','),
       })
 
       if (result?.error) {
@@ -71,12 +72,11 @@ export default function CreatePostPage() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto px-2 py-12">
+    <main className="max-w-5xl mx-auto px-2 py-5">
       <h1 className="text-2xl mb-8">Create Post</h1>
 
       <form onSubmit={handleSubmit} className="signup-form" style={{ maxWidth: '680px' }}>
 
-        {/* Title */}
         <div className="form-field">
           <label htmlFor="title">Title</label>
           <input
@@ -89,16 +89,11 @@ export default function CreatePostPage() {
           />
         </div>
 
-        {/* Content */}
         <div className="form-field">
-          <label htmlFor="content">Content</label>
-          <textarea
-            id="content"
-            name="content"
-            value={form.content}
-            onChange={handleChange}
-            rows={10}
-            required
+          <label>Content</label>
+          <RichTextEditor
+            content={form.content}
+            onChange={(html) => setForm(prev => ({ ...prev, content: html }))}
           />
         </div>
 
@@ -116,7 +111,7 @@ export default function CreatePostPage() {
         {/* Images */}
         {/* <div className="form-field">
           <label>Images</label>
-          <label htmlFor="images" className="btn" style={{ display: 'inline-block', cursor: 'pointer' }}>
+          <label htmlFor="images" className="btn" style={{ display: 'inline-block', cursor: 'pointer', width: 'fit-content' }}>
             Add Images
           </label>
           <input

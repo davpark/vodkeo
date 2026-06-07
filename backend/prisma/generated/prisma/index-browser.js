@@ -124,6 +124,7 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   did: 'did',
   handle: 'handle',
   birthday: 'birthday',
+  isAdmin: 'isAdmin',
   createdAt: 'createdAt'
 };
 
@@ -138,7 +139,8 @@ exports.Prisma.PostScalarFieldEnum = {
   authorHandle: 'authorHandle',
   createdAt: 'createdAt',
   views: 'views',
-  score: 'score'
+  score: 'score',
+  deleted: 'deleted'
 };
 
 exports.Prisma.CommentScalarFieldEnum = {

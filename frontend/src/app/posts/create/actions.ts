@@ -20,6 +20,14 @@ export async function submitPost(data: PostData) {
     .map(t => t.trim())
     .filter(Boolean)
 
+  if (tags.includes('news')) {
+    const adminRes = await fetch(`${process.env.BACKEND_URL}/api/admin/me?did=${session.did}`)
+    const isAdmin = adminRes.ok && (await adminRes.json()).isAdmin
+    if (!isAdmin) {
+      return { error: 'The "news" tag is restricted.' }
+    }
+  }
+
   try {
     const response = await fetch(`${process.env.BACKEND_URL}/api/posts`, {
       method: 'POST',

@@ -56,6 +56,42 @@ export async function login({ identifier, password, pds }: LoginParams) {
     }
 }
 
+export async function requestPasswordResetPublic({
+    email,
+    pds,
+}: {
+    email: string
+    pds: string
+}) {
+    try {
+        const agent = new AtpAgent({ service: pds })
+        await agent.com.atproto.server.requestPasswordReset({ email })
+        return { success: true }
+    } catch (err) {
+        if (err instanceof Error) return { error: err.message }
+        return { error: 'Failed to send reset email.' }
+    }
+}
+
+export async function resetPasswordPublic({
+    token,
+    newPassword,
+    pds,
+}: {
+    token: string
+    newPassword: string
+    pds: string
+}) {
+    try {
+        const agent = new AtpAgent({ service: pds })
+        await agent.com.atproto.server.resetPassword({ token, password: newPassword })
+        return { success: true }
+    } catch (err) {
+        if (err instanceof Error) return { error: err.message }
+        return { error: 'Failed to reset password.' }
+    }
+}
+
 export async function logout() {
     const cookieStore = await cookies()
     cookieStore.delete('atproto_session')

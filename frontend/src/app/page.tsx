@@ -1,8 +1,9 @@
-import { getPosts, getTags, getTopPosts, getStats } from '@/lib/api'
+import { getPosts, getTags, getTopPosts, getStats, getLatestNewsPost } from '@/lib/api'
 import Link from 'next/link'
 import { Post, TopPost } from '@/types'
-import ThemeToggle from '@/components/ThemeToggle'
 import { getSession } from '@/lib/session'
+import { cookies } from 'next/headers'
+import NewsBanner from '@/components/NewsBanner'
 
 export default async function HomePage({
   searchParams,
@@ -13,22 +14,28 @@ export default async function HomePage({
   const tag = params.tag
   const sort = params.sort ?? 'recent'
   const session = await getSession()
+  const cookieStore = await cookies()
+  const dismissedId = Number(cookieStore.get('dismissed_news_post_id')?.value ?? 0)
 
   let posts: Post[] = []
   let topPosts: TopPost[] = []
   let tags: { tag: string; count: number }[] = []
   let stats = { postCount: 0, tagCount: 0 }
+  let latestNews: Post | null = null
 
   try {
-    [posts, topPosts, tags, stats] = await Promise.all([
+    ;[posts, topPosts, tags, stats, latestNews] = await Promise.all([
       getPosts(tag, sort),
       getTopPosts(),
       getTags(),
       getStats(),
+      getLatestNewsPost(),
     ])
   } catch (error) {
     console.error('Failed to load homepage data:', error)
   }
+
+  const showNewsBanner = latestNews !== null && latestNews.id !== dismissedId
 
   return (
     <main className="max-w-5xl mx-auto px-2 py-4">
@@ -51,9 +58,12 @@ export default async function HomePage({
         </div>
       )}
 
+      {showNewsBanner && latestNews && (
+        <NewsBanner post={latestNews} isLoggedIn={!!session} />
+      )}
+
       <div className="home-layout">
 
-        {/* Main feed */}
         <div className="home-main">
           <div className="page-top-bar">
             <div className="sort-controls">
@@ -119,8 +129,8 @@ export default async function HomePage({
                   <div className="post-card-bottom">
                     <div className="post-card-bottom-left">
                       <Link href={`/posts/${post.id}`}  className="post-preview">
-                        {post.content.slice(0, 160)}
-                        {post.content.length > 160 ? '...' : ''}
+                        {post.content.replace(/<[^>]+>/g, '').slice(0, 160)}
+                        {post.content.replace(/<[^>]+>/g, '').length > 160 ? '...' : ''}
                       </Link>
                       <Link href={`/posts/${post.id}`}  className="post-comment-count">
                         {post.commentCount ?? 0} {(post.commentCount ?? 0) === 1 ? 'comment' : 'comments'}
@@ -153,10 +163,8 @@ export default async function HomePage({
           )}
         </div>
 
-        {/* Sidebar */}
         <aside className="home-sidebar">
 
-          {/* Top Posts */}
           <div className="sidebar-widget">
             <h2 className="sidebar-title">Top Posts</h2>
             {topPosts.length === 0 ? (
@@ -178,7 +186,6 @@ export default async function HomePage({
             )}
           </div>
 
-          {/* Top Tags */}
           <div className="sidebar-widget">
             <h2 className="sidebar-title">Top Tags</h2>
             {tags.length === 0 ? (

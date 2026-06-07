@@ -11,6 +11,7 @@ model UserProfile {
   did       String    @unique
   handle    String
   birthday  DateTime
+  isAdmin   Boolean   @default(false)
   createdAt DateTime  @default(now())
   posts     Post[]    @relation("UserPosts")
   comments  Comment[] @relation("UserComments")
@@ -30,6 +31,7 @@ model Post {
   comments     Comment[]
   views        Int          @default(0)
   score        Float        @default(0)
+  deleted      Boolean      @default(false)
 }
 
 model Comment {

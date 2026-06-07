@@ -32,6 +32,15 @@ export async function getTopPosts(): Promise<TopPost[]> {
   return data.map((p: any) => ({ ...p, commentCount: p._count?.comments ?? 0 }))
 }
 
+export async function getLatestNewsPost(): Promise<Post | null> {
+  const res = await fetch(`${API_URL}/api/posts?tag=news`, { cache: 'no-store' })
+  if (!res.ok) return null
+  const data = await res.json()
+  if (!data.length) return null
+  const p = data[0]
+  return { ...p, commentCount: p._count?.comments ?? 0 }
+}
+
 export async function getStats(): Promise<{ postCount: number; tagCount: number }> {
   const [posts, tags] = await Promise.all([
     fetch(`${API_URL}/api/posts`, { cache: 'no-store' }).then(r => r.ok ? r.json() : []),
