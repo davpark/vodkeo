@@ -16,6 +16,7 @@ export interface Post {
   authorHandle?: string
   createdAt: string
   commentCount?: number
+  deleted?: boolean
   author?: {
     name?: string
     email?: string
