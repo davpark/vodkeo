@@ -18,7 +18,6 @@ export async function requestPasswordReset() {
       active: true,
     })
 
-    // We need the user's email — fetch from PDS
     const accountInfo = await agent.com.atproto.server.getSession()
     await agent.com.atproto.server.requestPasswordReset({
       email: accountInfo.data.email!,
@@ -97,12 +96,10 @@ export async function deleteAccount() {
   if (!session) return { error: 'Not logged in.' }
 
   try {
-    // Delete posts and comments from database
     await fetch(`${process.env.BACKEND_URL}/api/users?did=${encodeURIComponent(session.did)}`, {
       method: 'DELETE',
     })
 
-    // Clear session
     const cookieStore = await cookies()
     cookieStore.delete('atproto_session')
 

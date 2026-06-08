@@ -11,6 +11,7 @@
   "dependencies": {
     "@atproto/api": "^0.20.9",
     "@swc/helpers": "^0.5.23",
+    "@tiptap/extension-image": "^3.26.0",
     "@tiptap/extension-link": "^3.26.0",
     "@tiptap/pm": "^3.26.0",
     "@tiptap/react": "^3.26.0",

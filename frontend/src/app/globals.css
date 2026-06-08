@@ -1599,3 +1599,77 @@ body {
 .comment-content a:hover::after {
   opacity: 1;
 }
+
+.rte-link-wrapper {
+  position: relative;
+}
+
+.rte-link-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--background);
+  border: 1px solid var(--foreground);
+  padding: 0.75rem;
+  z-index: 100;
+  min-width: 280px;
+}
+
+.rte-popover-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--foreground-muted);
+  margin-bottom: 0.25rem;
+}
+
+.rte-popover-hint {
+  font-size: 0.7rem;
+  color: var(--foreground-muted);
+  margin-bottom: 0.5rem;
+}
+
+.rte-image {
+  max-width: 100%;
+  max-height: 400px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  cursor: pointer;
+  border: 1px solid var(--foreground-muted);
+  display: block;
+  margin: 0.5rem 0;
+  transition: opacity 0.15s ease;
+}
+
+.rte-image:hover {
+  opacity: 0.85;
+}
+
+.rte-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.rte-lightbox-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 90vw;
+  max-height: 90vh;
+  cursor: default;
+}
+
+.rte-lightbox-inner img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}

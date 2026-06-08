@@ -147,6 +147,7 @@ const POST_SELECT = {
   deleted: true,
   author: true,
   _count: { select: { comments: true } },
+  editedAt: true,
 } as const;
 
 app.get('/api/posts', async (req, res) => {
@@ -255,6 +256,34 @@ app.post('/api/posts', async (req, res) => {
     res.status(500).json({ error: 'Failed to create post' });
   }
 });
+
+app.patch('/api/posts/:id', async (req, res) => {
+  try {
+    const { title, content, tags, authorDid } = req.body
+    const post = await prisma.post.findUnique({
+      where: { id: Number(req.params.id) },
+    })
+
+    if (!post) {
+      res.status(404).json({ error: 'Post not found' })
+      return
+    }
+
+    if (post.authorDid !== authorDid) {
+      res.status(403).json({ error: 'Not authorized to edit this post' })
+      return
+    }
+
+    const updated = await prisma.post.update({
+      where: { id: Number(req.params.id) },
+      data: { title, content, tags, editedAt: new Date() },  // add editedAt
+    })
+
+    res.json(updated)
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update post' })
+  }
+})
 
 app.post('/api/posts/:id/view', async (req, res) => {
   try {

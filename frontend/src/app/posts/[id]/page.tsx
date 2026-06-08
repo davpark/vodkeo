@@ -100,9 +100,16 @@ export default async function PostPage({
                 </span>
               </div>
             )}
-
+            {post.editedAt && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
+                <em className="post-date">edited</em>
+              </div>
+            )}
             {isAuthor && (
-              <div style={{ marginTop: '2rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '2rem' }}>
+                <Link href={`/posts/${Number(id)}/edit`} className="btn">
+                  Edit Post
+                </Link>
                 <DeletePostButton postId={Number(id)} />
               </div>
             )}

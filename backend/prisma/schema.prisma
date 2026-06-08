@@ -32,6 +32,7 @@ model Post {
   views        Int          @default(0)
   score        Float        @default(0)
   deleted      Boolean      @default(false)
+  editedAt     DateTime?
 }
 
 model Comment {

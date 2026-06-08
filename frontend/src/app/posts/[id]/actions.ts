@@ -3,6 +3,28 @@
 import { getValidSession } from '@/lib/refreshSession'
 import { getSession } from '@/lib/session'
 
+export async function editPost(postId: number, data: {
+  title: string
+  content: string
+  tags: string[]
+}) {
+  const session = await getSession()
+  if (!session) return { error: 'Not logged in' }
+
+  const res = await fetch(`${process.env.BACKEND_URL}/api/posts/${postId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...data, authorDid: session.did }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json()
+    return { error: err.error || 'Failed to update post' }
+  }
+
+  return { success: true }
+}
+
 export async function submitComment({
   postId,
   content,
